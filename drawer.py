@@ -143,6 +143,11 @@ canvas.fill(WHITE)
 window.blit(canvas, (0, 0))
 window.fill(WHITE)
 
+myfont = pygame.font.SysFont("monospace", 16)
+predicted_digit = -1
+scoretext = myfont.render("Predicted: " + str(predicted_digit), 1, (0, 0, 0))
+window.blit(scoretext, (5, 5))
+
 while True:
     for event in pygame.event.get():
         left_pressed, middle_pressed, right_pressed = pygame.mouse.get_pressed()
@@ -157,8 +162,17 @@ while True:
             image_path = "screenshot.png"
             pygame.image.save(window, image_path)
             resize(image_path)
-            print(predict(image_path))
+            # erase text
+            scoretext = myfont.render("Predicted: " + str(predicted_digit), 1, (255, 255, 255))
+            window.blit(scoretext, (5, 5))
+            predicted_digit = predict(image_path)
+            scoretext = myfont.render("Predicted: " + str(predicted_digit), 1, (0, 0, 0))
+            window.blit(scoretext, (5, 5))
+
+
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             window.fill(WHITE)
+            scoretext = myfont.render("Predicted: " + str(predicted_digit), 1, (0, 0, 0))
+            window.blit(scoretext, (5, 5))
         pygame.display.update()
 

@@ -497,10 +497,45 @@ Approx 91% is very bad, 6 digit ZIP code would have an accuracy rate of 57%
 [[file:images/cnn_network_flowchart.png]]
 #+END_CENTER
 *** Features
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 100%
+[[file:images/features.png]]
+#+END_CENTER
+*** Features (1)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 60%
+[[file:images/features_2.png]]
+#+END_CENTER
 *** Convolution
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 100%
+[[file:images/convolution.png]]
+#+END_CENTER
+*** Convolution (1)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 100%
+[[file:images/convolution_2.png]]
+#+END_CENTER
+*** Convolution (2)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 100%
+[[file:images/convolution_3.png]]
+#+END_CENTER
 *** Pooling
-*** Deep Learning
-*** Fully Connected Layers
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 80%
+[[file:images/pooling.png]]
+#+END_CENTER
+*** Pooling (1)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 80%
+[[file:images/pooling_2.png]]
+#+END_CENTER
+*** Fully Connected Layers (edit image)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 90%
+[[file:images/layers.png]]
+#+END_CENTER
 *** Hyper Parameters
 - Convolution:
   - Number of features
