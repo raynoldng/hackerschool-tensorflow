@@ -1,0 +1,83 @@
+#+TITLE: Machine Learning with TensorFlow
+#+SUBTITLE: Hackerschool, NUS Hackers
+#+AUTHOR: Raynold Ng
+#+EMAIL: raynold.ng24@gmail.com
+
+* Useful links
+[[https://blog.jakuba.net/2017/05/30/tensorflow-visualization.html][Visualing TF graphs in Jupyter Notebooks]]
+* What you'll learn about TensorFlow
+** How to build TensorFlow graphs
+*** Inputs, variables, ops, tensors, sessions
+** Run/evaluate graphs, and how to train models
+** use tensorboard for visualization
+* What we'll do from a ML perspective
+THis is not a machine learning tutorial, but
+** MNIST Example
+*** Softmax (multinomial logistic) regression
+*** Convoluted Neural Networks
+* Agenda
+** Installation and Setup
+** Brief Intro to machine learning
+** What's TensorFlow?
+* Installation and Setup
+** Ensure that you have the following installed or setup:
+*** TensorFlow: https://www.tensorflow.org/install/
+*** Python 3 (Python 2 is fine): https://www.python.org/downloads/
+*** Jupyter (recommended): http://jupyter.org/
+*** Slides: (TODO)
+* What is Machine Learning?
+Field of study that gives computers the ability to learn without being explicitly programmed
+* Machine Learning Primer
+  from https://www.youtube.com/watch?v=vQtxTZ9OA2M
+** Structure in data
+- some interpretations to "structure in data"
+  - given some data, one can predict other data points with some confidence
+  - one can compress the data, i.e., store the smae amount of information, with
+    less space
+*** Entropy
+- quantified as Entropy of Process
+$$H(X) = -\sum_{i=1}^{N} p(x_i) \log_2 p(x_i)$$
+- If entropy increases, uncertainty in prediction increases
+- Example: coin flip vs dice roll (higher entropy)
+- Example: fair coin hard to predict
+*** Information in features
+- prediction is only possible if there are information-rich signals
+- poses an upper bound on model performance and confidence in prediction
+- tight cluster vs loose cluster, tight is easier to predict
+- more features, more information?
+- features can carry redundant information
+- for continous variables that are linearly related, can use Pearson correlation coefficient
+- variables can be related by not linearly
+- variables can be categorical
+- correlation coefficient wouldn't work
+*** Variable Dependency
+- if different features 
+*** Dimensionality Reduction
+** Making Predictions with Models
+*** Graph Representation of Models
+*** Activation Functions in Neural Networks
+*** Loss Functions
+*** Gradient Descent
+* TensorFlow
+** What is TensorFlow?
+*** Big Idea: express a numeric computation as a graph
+**** Graph nodes are operations which have any number of inputs and outputs
+**** Graph edges are tensors which flow between nodes
+*** Operates over *tensors*: /n-dimensional arrays/
+*** Uses a *flow graph*: /data flow computation framework/
+**** flexible, intuitive construction
+**** train on CPUs, GPUs
+**** Run wherever you like
+** Core TensorFlow Data Structures and Concepts
+*** Graph: a TensorFlow computation, representated as a dataflow graph
+**** collection of ops that may be executed together as a group
+*** Operation: a graph node that performs computation on tensors
+*** Tensor: a handle to one of the outputs of an Operation
+*** Constants
+*** Placeholders: must be fed with data on execution
+*** Variables: modifiable tensor that lives in TensorFlow's graph of interaction operations
+*** Session: encapsulates the environment in which objects are executed and evaluated
+** Operations (not sure to include this, long list)
+** Documentation
+*** insert link here
+    

@@ -1,0 +1,636 @@
+#+TITLE: Introduction to TensorFlow
+#+SUBTITLE: Hackerschool, NUS Hackers
+#+DATE: 2017/10/14
+#+AUTHOR: Raynold Ng
+#+EMAIL: raynold.ng24@gmail.com
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:nil p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:nil todo:t |:t
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+
+#+WWW: http://www.nushackers.org/
+#+TWITTER: @nushackers
+
+#+FAVICON: images/tensorflow.png
+#+ICON: images/tensorflow.png
+#+HASHTAG: #hackerschool #docker
+* Load I/O Slides                                                  :noexport:
+#+BEGIN_SRC emacs-lisp :tangle no
+  (require 'ox-ioslide)
+#+END_SRC
+* Agenda
+  :PROPERTIES:
+  :END:
+- Installation and Setup
+- What's TensorFlow?
+- Machine Learning Primer
+- Basic TensorFlow concepts
+- MNIST Example
+  - Softmax
+  - Convoluted Neural Networks
+* Installation and Setup
+
+Ensure that you have the following installed:
+1. TensorFlow: https://www.tensorflow.org/install/
+2. Python 3: https://www.python.org/downloads/
+3. Jupyter (recommended): http://jupyter.org/
+
+Materials are available here: insert link
+* Machine Learning Primer
+Meant to provide basic mathematical background. 
+
+** Structure in data
+- some interpretations to "structure in data"
+  - given some data, one can predict other data points with some confidence
+  - one can compress the data, i.e., store the smae amount of information, with
+    less space
+
+\begin{align*}
+A = {1, 2, 6, 4, 7, 9, 0} \\
+B = {1, 2, 1, 2, 1, 2, 1}
+\end{align*}
+
+- we might say that A has apparent structure while B does not
+
+*** Entropy
+- quantified as Entropy of Process
+$$H(X) = -\sum_{i=1}^{N} p(x_i) \log_2 p(x_i)$$
+- If entropy increases, uncertainty in prediction increases
+*** Entropy (examples)
+- Example: fair dice
+$$H(\text{fair dice roll}) = -\sum_{i=1}^6 \frac{1}{6} \log_2 \frac{1}{6}=2.58$$
+- Example: biased 20:80 coin
+$$H(20/80 \text{ coin toss}) = -\frac{1}{5}\log_2 \frac{1}{5}-\frac{4}{5}\log_2 \frac{4}{5} = 0.72$$
+- biased coin toss has lower entropy; predicting its outcome is easier than a fair dice
+*** Information in features
+    
+- to make predicts, signals need to be information rich
+- [insert image on clusters here]
+*** Dimensionality Reduction
+- signals used to make predictions can contain redundant information
+- true dimensionality of a problem is often much smaller than number of
+  available features
+- common method for dimensionality reduction: PCA
+** Basic Concepts for TensorFlow
+Recall from linear algebra that:
+- Scalar: an array in 0-D
+- Vector: an array in 1-D
+- Matrix: an array in 2-D
+
+All are *tensors* of n-order. Similary, tensors can be transformed with
+operations. Simple linear regression model:
+
+$$w_o + w_1 x = \hat{y}$$
+
+$w_0$ and $w_1$ are *weights*, that are determined during training. $\hat{y}$ is
+predicted outcome
+** Graph Representation of ML Models
+
+Can represent linear regression as a graph
+
+#+ATTR_HTML: :width 40%
+[[file:images/linear_reg_graph.png]]
+
+- operations are represented as nodes
+- graph shows how data is transformed by nodes and what is passed between them
+** Graph Representation of ML Models (1)
+Consider a slightly larger neural net graph:
+#+ATTR_HTML: :width 60%
+[[file:images/neural_net.png]]
+
+For more complex models, it could be helpful to visualize your graph.
+[[https://www.tensorflow.org/versions/r0.7/how_tos/graph_viz/index.html][TensorBoard]] provides this virtualization tool
+** Activation Functions
+- If $g(u)$ is linear, then we return to linear regression
+- In practice, $g(\dots)$ is non-linear, and a popular function is the rectified linear unit (*ReLU*):
+$$g(u) = max(0, u)$$
+
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 70%
+[[file:images/relu.png]]
+#+END_CENTER
+
+** Model Output
+- output depends on activation function used, but is generally any real number $[-\infty, \infty]$
+- For categorical classification, e.g. binary classification, an additional
+  sigmoid function can be applied to bring the output to range of $[0,1]$
+$$S(x) = \frac{1}{1+e^{-x}}$$
+[insert image]
+** Softmax Function
+- for multi-class prediction (e.g. image classification) a softmax function is used:
+$$S_j(\boldsymbol{z}) = \frac{e^{z_j}}{\sum_{k=1}^K e^{z_k}} \text{ for }j=1,\dots,k$$
+- squash $K$ dimensional vector *z* to a $K$ dimensional vector that sum to 1
+$$\sum_{j=1}^k S_j(\boldsymbol{z}) = 1$$
+- state usually represented with *one-hot encoding*, e.g for dice roll $(0,0,1,0,0,0)$
+* Basic TensorFlow Concepts
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+** Data Flow Graphs
+Tensorflow separates definition of computations from their execution
+
+Phases:
+1. assemble the graph
+2. use a =session= to execute operations in the graph
+
+#+BEGIN_SRC python
+import tensorflow as tf
+a = tf.add(3,5)
+#+END_SRC
+
+** Visualizing with TensorBoard
+
+- `tf.summary.FileWriter` serializes the graph into a format the TensorBoard can read
+
+#+BEGIN_SRC python
+tf.summary.FileWriter("logs", tf.get_default_graph()).close()
+#+END_SRC
+
+- in the same directory, run:
+
+#+BEGIN_SRC sh
+tensorboard --logdir=logs
+#+END_SRC
+
+- This will launch an instance of TensorBoard that you can access at http://localhost:6006
+
+** How to get value of `a`?
+#+BEGIN_SRC python
+print(a)
+#+END_SRC
+
+Create a `session`, and within it, evaluate the graph
+
+#+BEGIN_SRC python
+sess = tf.Session()
+print(sess.run(a))
+sess.close()
+#+END_SRC
+
+Alternatively:
+
+#+BEGIN_SRC python
+with tf.Session() as sess:
+    print(sess.run(a))
+#+END_SRC
+
+** Practice with More Graphs
+
+Try to generate the following graph:
+
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 70%
+[[file:images/graph2.png]]
+#+END_CENTER
+
+Useful functions: =tf.add=, =tf.multiply=, =tf.pow=
+
+** Solution
+
+#+BEGIN_SRC python
+x = 2
+y = 3
+op1 = tf.add(x, y)
+op2 = tf.multiply(x, y)
+op3 = tf.pow(op1, op2)
+with tf.Session() as sess:
+    op3 = sess.run(op3)
+#+END_SRC
+
+** TensorFlow Variables
+
+- TensorFlow variables used to represent shared, persistant state manipulated by your program
+- variables hold and update parameters in your model during training
+- variables contain tensors
+
+#+BEGIN_SRC python
+W1 = tf.ones((2,2))
+W2 = tf.Variable(tf.zeros((2,2)), name="weights")
+
+with tf.Session() as sess:
+    print(sess.run(W1))
+    sess.run(tf.global_variables_initializer())
+    print(sess.run(W2))
+#+END_SRC
+
+** Updating Variable State
+
+Use =tf.assign= to assign a value to a variable
+
+#+BEGIN_SRC python
+state = tf.Variable(0, name="counter")
+new_value = tf.add(state, tf.constant(1))
+update = tf.assign(state, new_value)
+
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    print(sess.run(state))
+    for _ in range(3):
+        sess.run(update)
+        print(sess.run(state))
+#+END_SRC
+
+** Fetching Variable State
+
+#+BEGIN_SRC python
+input1 = tf.constant(3.0)
+input2 = tf.constant(2.0)
+input3 = tf.constant(5.0)
+intermed = tf.add(input2, input3)
+mul = tf.multiply(input1, intermed)
+
+with tf.Session() as sess:
+    result = sess.run([mul, intermed])
+    print(result)
+#+END_SRC
+
+** TensorFlow Placeholders
+
+- =tf.placeholder= variables represent our input data
+- =feed_dict= is a python dictionary that maps =tf.placeholder= variables to data
+
+#+BEGIN_SRC python
+input1 = tf.placeholder(tf.float32)
+input2 = tf.placeholder(tf.float32)
+
+output = tf.multiply(input1, input2)
+
+with tf.Session() as sess:
+    print(sess.run([output], feed_dict={input1:[7.], input2:[2.]}))
+#+END_SRC
+
+** Example: Linear Regression
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+*** Recap
+- we have two weights $w_0$ and $w_1$, we want the model to figure out good weights by minimizing prediction error
+- define the following *loss function*
+
+$$L = \sum (y - \hat{y})^2$$
+
+Supose we want to model the following "unknown" function:
+
+$$y = x + 20 \sin(x/10)$$
+*** Plot Input Data
+Make sure that =seaborn= and =matplotlib= are installed. If you are using Jupyter, add =%matplotlib inline= in the code cell.
+
+#+BEGIN_SRC python
+import tensorflow as tf
+import numpy as np
+import seaborn
+import matplotlib.pyplot as plt
+%matplotlib inline
+# Define input data
+X_data = np.arange(100, step=.1)
+y_data = X_data + 20 * np.sin(X_data/10)
+# Plot input data
+plt.scatter(X_data, y_data)
+#+END_SRC
+*** Scatter Plot
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 130%
+[[file:images/sample_data.png]]
+#+END_CENTER
+*** Define Variables and Placeholders
+#+BEGIN_SRC python
+# Define data size and batch size
+n_samples = 1000
+batch_size = 100
+
+# TensorFlow is particular about shapes, so resize
+X_data = np.reshape(X_data, (n_samples, 1))
+y_data = np.reshape(y_data, (n_samples, 1))
+
+# Define placeholders for input
+X = tf.placeholder(tf.float32, shape=(batch_size, 1))
+y = tf.placeholder(tf.float32, shape=(batch_size, 1))
+#+END_SRC
+*** Loss Function
+Loss function is defined as:
+$$J(W,b) = \frac{1}{N}\sum_{i=1}^{N}(y_i-(W_{x_i}+b))^2$$
+
+#+BEGIN_SRC python
+# Define variables to be learned
+with tf.variable_scope("linear-regression"):
+    W = tf.get_variable("weights", (1,1),
+                        initializer = tf.random_normal_initializer())
+    b = tf.get_variable("bias", (1,),
+                        initializer = tf.constant_initializer(0.0))
+    y_pred = tf.matmul(X, W) + b
+    loss = tf.reduce_sum((y - y_pred)**2/n_samples)
+#+END_SRC
+*** Define Optimizer and Train Model
+:PROPERTIES:
+:ARTICLE:  smaller
+:END:
+#+BEGIN_SRC python
+# Define optimizer operation
+opt_operation = tf.train.AdamOptimizer().minimize(loss)
+with tf.Session() as sess:
+    # Initialize all variables in graph
+    sess.run(tf.global_variables_initializer())
+    # Gradient descent for 500 steps:
+    for _ in range(500):
+        # Select from random mini batch
+        indices = np.random.choice(n_samples, batch_size)
+        X_batch, y_batch = X_data[indices], y_data[indices]
+        # Do gradient descent step
+        _, loss_val = sess.run([opt_operation, loss], feed_dict={X: X_batch, y: y_batch})
+    print(sess.run([W, b]))
+    # Display results
+    plt.scatter(X_data, y_data)
+    plt.scatter(X_data, sess.run(W) * X_data + sess.run(b), c='g')
+
+#+END_SRC
+*** Results
+
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 130%
+[[file:images/trained_model.png]]
+#+END_CENTER
+
+* MNIST and TensorFlow
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+** Introduction
+- MNIST is the hello world of machine learning
+- Simple computer vision dataset, consists of images of handwritten digits
+- We are going to train a model to predict what the digits are
+
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 80%
+[[file:images/MNIST.png]]
+#+END_CENTER
+*** Importing MNIST Data
+
+To download and read in the data automatically:
+
+#+BEGIN_SRC python
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+#+END_SRC
+
+One hot encoding
+- labels have been converted to a vector of length equal to number of classes. 
+- the ith element is 1, rest are 0. E.g. Digit 1: $[0,1,\dots]$
+*** MNIST Data
+The MNIST data is split into three parts:
+1. 55,000 data points of training data (`mnist.train`)
+2. 10,000 data points of test data (`mnist.test`)
+3. 5,000 data points of validation data (`mnist.validation`)
+
+Every MNIST data has 2 parts:
+1. an image of a handwritten digit (call it "x")
+2. corresponding label (call it "y")
+** Softmax Regression
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+*** Overview
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 140%
+[[file:images/softmax_1.png]]
+#+END_CENTER
+*** Overview (1)
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 120%
+[[file:images/softmax_2.png]]
+#+END_CENTER
+
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 120%
+[[file:images/softmax_3.png]]
+#+END_CENTER
+*** Defining Our Model
+- multiply 784-dimensional vectors by $W$ to produce 10-dimensional vectors of evidence
+#+BEGIN_SRC python
+x = tf.placeholder(tf.float32, [None, 784])
+W = tf.Variable(tf.zeros([784, 10]))
+b = tf.Variable(tf.zeros([10]))
+
+y = tf.nn.softmax(tf.matmul(x, W) + b)
+#+END_SRC
+- multiply =x= with =W= in that order as =x= has shape =[None, 784]= and =W= has shape =[784, 10]=
+- Small trick to deal with =x= being a 2D tensor with multiple inputs.
+*** Training
+Use *cross-entropy* to determine loss of model:
+$$H_{y'}=-\sum_{i} y_i' \log(y_i)$$
+
+Where:
+- $y$ is our predicted probability distribution
+- $y'$ is the true distribution (one-hot vector with digit labels)
+*** Training (1)
+Need a placeholder to implement cross entropy:
+
+#+BEGIN_SRC python
+y_ = tf.placeholder(tf.float32, [None, 10])
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), 
+                                              reduction_indices = [1]))
+#+END_SRC
+
+=tf.reduce_sum= computes the sum of elements across dimensions of a tensor
+
+#+BEGIN_SRC python
+# 'x' is [[1, 1, 1]
+#         [1, 1, 1]]
+tf.reduce_sum(x) ==> 6
+tf.reduce_sum(x, 0) ==> [2, 2, 2]
+tf.reduce_sum(x, 1) ==> [3, 3]
+#+END_SRC
+*** Training (2)
+
+#+BEGIN_SRC python
+train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+for _ in range(400):
+    batch_xs, batch_ys = mnist.train.next_batch(100)
+    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+#+END_SRC
+
+Using small batches of random data is called *stochastic training*, it is more
+feasible than training on the entire data set
+*** Evaluating Our Model
+
+- =tf.argmax= is an extrememly helpful function that returns the index of the highest entry in a tensor along some axis.
+- =tf.argmax(y,1)= is predicted label while `tf.argmax(y_, 1)` is the actual label
+- =tf.equal= to check if prediction matches the true
+
+#+BEGIN_SRC python
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
+#+END_SRC
+
+Approx 91% is very bad, 6 digit ZIP code would have an accuracy rate of 57% 
+** Convolutional Neural Network
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+*** Introduction
+- Convolutional Networks work by moving smaller filter across the input image
+- Filters are re-used for recognizing patters throughout the entire input image
+- This makes Convolutional Networks much more powerfule than Fully-Connected
+  networks with the same number of variables
+- Convolutional Networks are also faster to train
+*** Flowchart
+#+BEGIN_CENTER
+#+ATTR_HTML: :width 100%
+[[file:images/cnn_network_flowchart.png]]
+#+END_CENTER
+*** Features
+*** Convolution
+*** Pooling
+*** Deep Learning
+*** Fully Connected Layers
+*** Hyper Parameters
+- Convolution:
+  - Number of features
+  - Size of features
+- Pooling
+  - Window size
+  - Window stride
+- Fully Connected
+  - number of neurons
+*** Weight Initialization
+Helper functions to create ReLU neurons
+
+#+BEGIN_SRC python
+def weight_variable(shape):
+  initial = tf.truncated_normal(shape, stddev=0.1)
+  return tf.Variable(initial)
+
+def bias_variable(shape):
+  initial = tf.constant(0.1, shape=shape)
+  return tf.Variable(initial)
+#+END_SRC
+*** Convolution and Pooling
+#+BEGIN_SRC python
+def conv2d(x, W):
+  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+
+def max_pool_2x2(x):
+  return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+                        strides=[1, 2, 2, 1], padding='SAME')
+#+END_SRC
+*** First Convolutional Layer
+- first layer consists of convolution and then max pooling
+- compute 32 fearures for each 5x5 patch
+- also define our bias
+
+#+BEGIN_SRC python
+W_conv1 = weight_variable([5, 5, 1, 32])
+b_conv1 = bias_variable([32])
+x_image = tf.reshape(x, [-1, 28, 28, 1]) # ?, width, height, number of color channels
+h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+h_pool1 = max_pool_2x2(h_conv1) # reduce image to 14x14
+#+END_SRC
+*** Second Convolutional Layer
+- 64 features for each 5x5 patch
+- image is now 7x7
+
+#+BEGIN_SRC python
+W_conv2 = weight_variable([5, 5, 32, 64])
+b_conv2 = bias_variable([64])
+
+h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+h_pool2 = max_pool_2x2(h_conv2)
+#+END_SRC
+*** Densely Connected Layer
+- add a fully connected layer with 1024 neurons to allow processing of the entire image
+- reshape tensor from pooling layer into batch of vectors, muplity by a weight matrix, add a bias and then apply ReLU
+
+#+BEGIN_SRC python
+W_fc1 = weight_variable([7 * 7 * 64, 1024])
+b_fc1 = bias_variable([1024])
+
+h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+#+END_SRC
+*** Read Out Layer
+Add one last layer, similar to softmax regression
+
+#+BEGIN_SRC python
+W_fc2 = weight_variable([1024, 10])
+b_fc2 = bias_variable([10])
+
+y_conv = tf.matmul(h_fc1, W_fc2) + b_fc2
+#+END_SRC
+*** Train and Evaluate the Model
+
+#+BEGIN_SRC python
+cross_entropy = tf.reduce_mean(
+    tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+#+END_SRC
+
+*** Train and Evaluate the Model (1)
+#+BEGIN_SRC python
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+with sess.as_default():
+    for i in range(500):
+        batch = mnist.train.next_batch(50)
+    if i % 100 == 0:
+        train_accuracy = accuracy.eval(feed_dict={
+          x: batch[0], y_: batch[1]})
+        print('step %d, training accuracy %g' % (i, train_accuracy))
+        train_step.run(feed_dict={x: batch[0], y_: batch[1]})
+
+    print('test accuracy %g' % accuracy.eval(feed_dict={
+      x: mnist.test.images, y_: mnist.test.labels}))
+#+END_SRC
+
+** Saving and Restoring your model
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+*** Exporting the Model
+- We can export the model for use in our own applications
+- use =tf.train.Saver= to save the graph and the trained weights
+#+BEGIN_SRC python
+model_path = "./tmp/model.ckpt"
+save_path = saver.save(sess, model_path) # saver is not declared???
+print("Model saved in file: %s" % save_path)
+#+END_SRC
+
+*** Restoring the Session
+#+BEGIN_SRC python
+saver = tf.train.Saver()
+model_path = "./tmp/model.ckpt"
+with tf.Session() as sess:
+  sess.run(tf.global_variables_initializer())
+  saver.restore(sess, model_path)
+  print("Accuracy:", accuracy.eval({x: mnist.test.images, y_: mnist.test.labels}))
+#+END_SRC
+** Toy Program
+[insert link to github repo here]
+* Thank You
+:PROPERTIES:
+:SLIDE: thank-you-slide segue
+:ASIDE: right
+:ARTICLE: flexbox vleft auto-fadein
+:END:
