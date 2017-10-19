@@ -155,7 +155,7 @@ while True:
             pygame.quit()
             sys.exit()
         elif left_pressed:
-            pygame.draw.rect(window, BLACK, pygame.mouse.get_pos()+(10,10),10)
+            pygame.draw.rect(window, BLACK, pygame.mouse.get_pos()+(10,10),6)
             # pygame.draw.circle(window, BLACK, (pygame.mouse.get_pos()), 10)
         elif right_pressed:
             print("saving image")
