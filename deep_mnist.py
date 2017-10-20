@@ -69,8 +69,6 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 saver = tf.train.Saver()
 
-# Running first session
-print("Starting 1st session...")
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   for i in range(200000):
@@ -85,14 +83,4 @@ with tf.Session() as sess:
   save_path = saver.save(sess, model_path)
   print("Model saved in file: %s" % save_path)
   print("Accuracy:", accuracy.eval({x: mnist.test.images, y_: mnist.test.labels}))
-
-
-# with tf.Session() as sess:
-#   sess.run(tf.global_variables_initializer())
-#   saver.restore(sess, model_path)
-#   print("Accuracy:", accuracy.eval({x: mnist.test.images, y_: mnist.test.labels}))
-
-#   # attempt on random imagey_est
-#   img = mnist.test.images[1]
-#   print(sess.run([y_conv], {x:[img]}))
 

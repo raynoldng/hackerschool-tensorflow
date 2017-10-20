@@ -119,6 +119,8 @@ model_path = "./tmp/model.ckpt"
 # saver.restore(sess, model_path)
 # print("model restored")
 
+# check out meta_signature_graph
+
 def predict(image_path):
     # im = imageprepare(image_path)
     # print(type(im))
