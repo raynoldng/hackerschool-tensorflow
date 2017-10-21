@@ -2,7 +2,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 import tensorflow as tf
 
-model_path = "./tmp/model.ckpt"
+model_path = "./tmp/test_model.ckpt"
 
 # Set up
 # Create the model
@@ -66,13 +66,12 @@ predict_op = tf.argmax(y_conv, 1)
 correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-
 saver = tf.train.Saver()
 
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
-  for i in range(200000):
-    batch = mnist.train.next_batch(50)
+  for i in range(300):
+    batch = mnist.train.next_batch(25)
     if i % 100 == 0:
       train_accuracy = accuracy.eval(feed_dict={
               x: batch[0], y_: batch[1]})

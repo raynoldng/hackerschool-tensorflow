@@ -24,19 +24,12 @@ X = tf.placeholder(tf.float32, shape=(batch_size, 1))
 y = tf.placeholder(tf.float32, shape=(batch_size, 1))
 
 # Define variables to be learned
-with tf.variable_scope("linear-regression"):
-    W = tf.get_variable("weights", (1,1),
-                        initializer = tf.random_normal_initializer())
-    b = tf.get_variable("bias", (1,),
-                        initializer = tf.constant_initializer(0.0))
-    y_pred = tf.matmul(X, W) + b
-    loss = tf.reduce_sum((y - y_pred)**2/n_samples)
-
-
-## Does not seem to work
-# with tf.Session() as sess:
-#     sess.run(tf.global_variables_initializer())
-#     sess.run([opt_operation], feed_dict={X: X_data, y:y_data})
+W = tf.get_variable("weights", (1,1),
+                    initializer = tf.random_normal_initializer())
+b = tf.get_variable("bias", (1,),
+                    initializer = tf.constant_initializer(0.0))
+y_pred = tf.matmul(X, W) + b
+loss = tf.reduce_sum((y - y_pred)**2/n_samples)
 
 opt_operation = tf.train.AdamOptimizer().minimize(loss)
 
